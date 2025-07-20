@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # フロントエンドサービス
+  frontend:
+    build:
+      context: ./frontend/web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
+    networks:
+      - tone-network
+
+  # バックエンドサービス（将来の実装用）
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=3000
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - tone-network
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   profiles:
+  #     - development
+
+  # データベースサービス（将来の実装用）
+  # database:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: tone_db
+  #     POSTGRES_USER: tone_user
+  #     POSTGRES_PASSWORD: tone_password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - tone-network
+  #   profiles:
+  #     - development
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  tone-network:
+    driver: bridge 
