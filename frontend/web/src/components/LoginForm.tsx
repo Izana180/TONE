@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LoginFormData, FormErrors } from '../types/auth';
 import { useAuth } from '../hooks/useAuth';
+import { ErrorPage } from './ErrorPage';
 import './AuthForms.css';
 
 interface LoginFormProps {
@@ -20,6 +21,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   // フィールドエラーの状態管理
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+
+  // エラーページ表示の状態管理
+  const [showErrorPage, setShowErrorPage] = useState(false);
+  const [authError, setAuthError] = useState<any>(null);
 
   // 認証フックの使用
   const { login, loading, error } = useAuth();
@@ -66,12 +71,83 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       return;
     }
 
-    // ログイン処理を実行
-    const success = await login(formData);
-    if (success) {
-      onLoginSuccess();
+    try {
+      // ログイン処理を実行
+      const success = await login(formData);
+      if (success) {
+        onLoginSuccess();
+      } else {
+        // 認証エラーの場合、エラーページを表示
+        setAuthError({
+          code: 'INVALID_CREDENTIALS',
+          message: 'メールアドレスまたはパスワードが正しくありません',
+          details: {
+            attemptedEmail: formData.email,
+            errorType: 'authentication_failed',
+            suggestion: '正しいメールアドレスとパスワードを入力してください',
+            testAccounts: [
+              {
+                email: 'test@example.com',
+                password: 'password123',
+                username: 'testuser'
+              },
+              {
+                email: 'admin@tone-app.com',
+                password: 'admin123',
+                username: 'admin'
+              },
+              {
+                email: 'demo@demo.com',
+                password: 'demo123',
+                username: 'demouser'
+              }
+            ]
+          }
+        });
+        setShowErrorPage(true);
+      }
+    } catch (err: any) {
+      // APIエラーの場合
+      if (err.response?.data?.error) {
+        setAuthError(err.response.data.error);
+      } else {
+        setAuthError({
+          code: 'UNKNOWN_ERROR',
+          message: '予期しないエラーが発生しました',
+          details: {
+            errorType: 'unknown_error',
+            suggestion: 'しばらく時間をおいてから再試行してください'
+          }
+        });
+      }
+      setShowErrorPage(true);
     }
   };
+
+  // エラーページの再試行ハンドラー
+  const handleRetry = () => {
+    setShowErrorPage(false);
+    setAuthError(null);
+  };
+
+  // ログイン画面に戻るハンドラー
+  const handleBackToLogin = () => {
+    setShowErrorPage(false);
+    setAuthError(null);
+    setFormData({ email: '', password: '' });
+    setFieldErrors({});
+  };
+
+  // エラーページが表示されている場合
+  if (showErrorPage && authError) {
+    return (
+      <ErrorPage
+        error={authError}
+        onRetry={handleRetry}
+        onBackToLogin={handleBackToLogin}
+      />
+    );
+  }
 
   return (
     <div className="auth-form-container">

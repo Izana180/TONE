@@ -17,6 +17,29 @@ services:
       - .env
     networks:
       - tone-network
+    depends_on:
+      - mock-api
+
+  # モックAPIサーバー
+  mock-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ./mock-server.js:/app/mock-server.js
+      - ./swagger-mock.yaml:/app/swagger-mock.yaml
+      - ./package.json:/app/package.json
+      - /app/node_modules
+    networks:
+      - tone-network
+    profiles:
+      - development
+      - mock
 
   # バックエンドサービス（将来の実装用）
   # backend:

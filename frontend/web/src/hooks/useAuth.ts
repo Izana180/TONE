@@ -100,7 +100,7 @@ export const useAuth = () => {
         return false;
       }
 
-      // API呼び出し（実際の実装ではここでAPIを呼び出します）
+      // API呼び出し
       const response = await mockLoginAPI(formData);
       
       // 成功時の処理
@@ -108,8 +108,13 @@ export const useAuth = () => {
       localStorage.setItem('user', JSON.stringify(response.user));
       
       return true;
-    } catch (err) {
-      setError('ログインに失敗しました');
+    } catch (err: any) {
+      // エラー情報を設定
+      if (err.message) {
+        setError(err.message);
+      } else {
+        setError('ログインに失敗しました');
+      }
       return false;
     } finally {
       setLoading(false);
@@ -131,37 +136,41 @@ export const useAuth = () => {
   };
 };
 
-// モックAPI関数（実際の実装では削除してください）
+// モックAPI関数（実際のAPI呼び出しに置き換え）
 const mockRegisterAPI = async (data: RegisterFormData): Promise<AuthResponse> => {
-  // 実際のAPI呼び出しに置き換えてください
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        user: {
-          id: '1',
-          username: data.username,
-          email: data.email,
-          createdAt: new Date().toISOString()
-        },
-        token: 'mock-token'
-      });
-    }, 1000);
+  // モックAPIサーバーを呼び出し
+  const response = await fetch('http://localhost:3000/api/v1/auth/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
   });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || '登録に失敗しました');
+  }
+
+  return response.json();
 };
 
 const mockLoginAPI = async (data: LoginFormData): Promise<AuthResponse> => {
-  // 実際のAPI呼び出しに置き換えてください
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        user: {
-          id: '1',
-          username: 'テストユーザー',
-          email: data.email,
-          createdAt: new Date().toISOString()
-        },
-        token: 'mock-token'
-      });
-    }, 1000);
+  // モックAPIサーバーを呼び出し
+  const response = await fetch('http://localhost:3000/api/v1/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
   });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    const error = new Error(errorData.error?.message || 'ログインに失敗しました');
+    (error as any).response = { data: errorData };
+    throw error;
+  }
+
+  return response.json();
 }; 

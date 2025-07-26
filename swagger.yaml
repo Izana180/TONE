@@ -1,0 +1,537 @@
+openapi: 3.0.3
+info:
+  title: TONE Authentication API (Frontend Mock)
+  description: |
+    TONEアプリケーションの認証API仕様書（フロントエンド開発用モック版）
+    
+    ## 概要
+    このAPIは、フロントエンド開発用のモック認証機能を提供します。
+    **モックAPI**のため、実際のデータベース操作は行わず、
+    固定のレスポンスを返します。
+    
+    ## モック認証ルール
+    ### ログイン成功パターン
+    以下の組み合わせでログイン成功（200）：
+    - `test@example.com` + `password123`
+    - `admin@tone-app.com` + `admin123`
+    - `demo@demo.com` + `demo123`
+    
+    ### ログイン失敗パターン
+    上記以外の組み合わせは全て認証失敗（401）
+    
+    ### ユーザー登録
+    - 任意の有効な入力で成功（201）
+    - `existing@example.com` の場合のみ重複エラー（409）
+    
+    ## テスト用アカウント
+    | メールアドレス | パスワード | ユーザー名 | 用途 |
+    |---|---|---|---|
+    | test@example.com | password123 | testuser | 基本テスト |
+    | admin@tone-app.com | admin123 | admin | 管理者テスト |
+    | demo@demo.com | demo123 | demouser | デモ用 |
+    
+    ## 注意事項
+    - 本番環境では使用しないでください
+    - データは永続化されません
+    - セキュリティ機能は簡素化されています
+  version: 1.0.0-mock
+  contact:
+    name: TONE Development Team
+    email: support@tone-app.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: フロントエンド開発環境（モック）
+
+tags:
+  - name: Authentication
+    description: 認証関連のエンドポイント（モック）
+  - name: Users
+    description: ユーザー情報関連のエンドポイント（モック）
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: ユーザー登録（モック）
+      description: |
+        新しいユーザーを登録します（モック版）。
+        
+        ## モック動作
+        - 基本的に全て成功（201）レスポンス
+        - `existing@example.com` の場合のみ409エラー
+        - バリデーションエラーは入力値によって判定
+        
+        ## バリデーションルール
+        - username: 3文字以上、50文字以下
+        - email: 有効なメールアドレス形式
+        - password: 6文字以上
+        - confirmPassword: passwordと一致する必要があります
+      operationId: registerUserMock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              success_case:
+                summary: 成功例
+                value:
+                  username: "newuser"
+                  email: "newuser@example.com"
+                  password: "password123"
+                  confirmPassword: "password123"
+              duplicate_case:
+                summary: 重複エラー例
+                value:
+                  username: "existinguser"
+                  email: "existing@example.com"
+                  password: "password123"
+                  confirmPassword: "password123"
+              validation_error_case:
+                summary: バリデーションエラー例
+                value:
+                  username: "ab"
+                  email: "invalid-email"
+                  password: "123"
+                  confirmPassword: "456"
+      responses:
+        '201':
+          description: ユーザー登録成功（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                user:
+                  id: "mock-user-001"
+                  username: "newuser"
+                  email: "newuser@example.com"
+                  createdAt: "2024-01-01T00:00:00.000Z"
+                token: "mock-jwt-token-12345"
+        '400':
+          description: バリデーションエラー（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "入力内容にエラーがあります"
+                  details:
+                    username: "ユーザー名は3文字以上で入力してください"
+                    email: "有効なメールアドレスを入力してください"
+                    password: "パスワードは6文字以上で入力してください"
+                    confirmPassword: "パスワードが一致しません"
+        '409':
+          description: ユーザー重複エラー（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  code: "USER_ALREADY_EXISTS"
+                  message: "このメールアドレスは既に登録されています"
+                  details: {}
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: ユーザーログイン（モック）
+      description: |
+        ユーザーのログインを処理します（モック版）。
+        
+        ## モック認証ルール
+        ### 成功パターン（200 OK）
+        - `test@example.com` + `password123` → testuser
+        - `admin@tone-app.com` + `admin123` → admin  
+        - `demo@demo.com` + `demo123` → demouser
+        
+        ### 失敗パターン（401 Unauthorized）
+        - 上記以外の全ての組み合わせ
+        - 空の入力値
+        - 無効なメールアドレス形式
+        
+        ## 認証フロー
+        1. メールアドレスとパスワードを送信
+        2. 固定の組み合わせと照合
+        3. 一致する場合はJWTトークンを返す
+        4. 不一致の場合は401エラーを返す
+      operationId: loginUserMock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              test_user_success:
+                summary: テストユーザーログイン成功
+                value:
+                  email: "test@example.com"
+                  password: "password123"
+              admin_user_success:
+                summary: 管理者ログイン成功
+                value:
+                  email: "admin@tone-app.com"
+                  password: "admin123"
+              demo_user_success:
+                summary: デモユーザーログイン成功
+                value:
+                  email: "demo@demo.com"
+                  password: "demo123"
+              invalid_credentials:
+                summary: 認証失敗例
+                value:
+                  email: "wrong@example.com"
+                  password: "wrongpassword"
+              empty_credentials:
+                summary: 空の認証情報
+                value:
+                  email: ""
+                  password: ""
+      responses:
+        '200':
+          description: ログイン成功（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                test_user_login:
+                  summary: テストユーザーログイン
+                  value:
+                    user:
+                      id: "mock-user-001"
+                      username: "testuser"
+                      email: "test@example.com"
+                      createdAt: "2024-01-01T00:00:00.000Z"
+                    token: "mock-jwt-token-test-12345"
+                admin_user_login:
+                  summary: 管理者ログイン
+                  value:
+                    user:
+                      id: "mock-user-002"
+                      username: "admin"
+                      email: "admin@tone-app.com"
+                      createdAt: "2024-01-01T00:00:00.000Z"
+                    token: "mock-jwt-token-admin-67890"
+                demo_user_login:
+                  summary: デモユーザーログイン
+                  value:
+                    user:
+                      id: "mock-user-003"
+                      username: "demouser"
+                      email: "demo@demo.com"
+                      createdAt: "2024-01-01T00:00:00.000Z"
+                    token: "mock-jwt-token-demo-11111"
+        '400':
+          description: バリデーションエラー（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "入力内容にエラーがあります"
+                  details:
+                    email: "メールアドレスは必須です"
+                    password: "パスワードは必須です"
+        '401':
+          description: 認証失敗（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  code: "INVALID_CREDENTIALS"
+                  message: "メールアドレスまたはパスワードが正しくありません"
+                  details: {}
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: ユーザーログアウト（モック）
+      description: |
+        ユーザーのログアウトを処理します（モック版）。
+        
+        ## モック動作
+        - 常に成功レスポンス（200）を返す
+        - 認証ヘッダーは任意（チェックしない）
+        - 実際のトークン無効化は行わない
+      operationId: logoutUserMock
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: ログアウト成功（モック）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ログアウトしました"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00.000Z"
+
+  /auth/me:
+    get:
+      tags:
+        - Users
+      summary: 現在のユーザー情報取得（モック）
+      description: |
+        現在ログインしているユーザーの情報を取得します（モック版）。
+        
+        ## モック動作
+        - 固定のテストユーザー情報を返す
+        - 認証ヘッダーは任意（チェックしない）
+        - 常に同じユーザー情報を返す
+      operationId: getCurrentUserMock
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: ユーザー情報取得成功（モック）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: "mock-user-001"
+                username: "testuser"
+                email: "test@example.com"
+                createdAt: "2024-01-01T00:00:00.000Z"
+                profile:
+                  firstName: "テスト"
+                  lastName: "ユーザー"
+                  avatar: "https://example.com/avatar.jpg"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWTトークンを使用した認証（モック版）。
+        実際の認証処理は行わず、任意のトークンでアクセス可能です。
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - confirmPassword
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+          description: ユーザー名（英数字とアンダースコアのみ）
+          example: "testuser"
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: "test@example.com"
+        password:
+          type: string
+          minLength: 6
+          description: パスワード（6文字以上）
+          example: "password123"
+        confirmPassword:
+          type: string
+          description: パスワード確認（passwordと一致する必要があります）
+          example: "password123"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: "test@example.com"
+        password:
+          type: string
+          description: パスワード
+          example: "password123"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ユーザーID
+          example: "mock-user-001"
+        username:
+          type: string
+          description: ユーザー名
+          example: "testuser"
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+          example: "test@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: アカウント作成日時
+          example: "2024-01-01T00:00:00.000Z"
+        profile:
+          type: object
+          description: プロフィール情報（オプション）
+          properties:
+            firstName:
+              type: string
+              example: "テスト"
+            lastName:
+              type: string
+              example: "ユーザー"
+            avatar:
+              type: string
+              format: uri
+              example: "https://example.com/avatar.jpg"
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          description: JWTトークン（モック）
+          example: "mock-jwt-token-12345"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: エラーコード
+              example: "INVALID_CREDENTIALS"
+            message:
+              type: string
+              description: エラーメッセージ
+              example: "メールアドレスまたはパスワードが正しくありません"
+            details:
+              type: object
+              description: エラーの詳細情報
+              additionalProperties: true
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: "VALIDATION_ERROR"
+                message:
+                  type: string
+                  example: "入力内容にエラーがあります"
+                details:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  example:
+                    username: "ユーザー名は3文字以上で入力してください"
+                    email: "有効なメールアドレスを入力してください"
+                    password: "パスワードは6文字以上で入力してください"
+                    confirmPassword: "パスワードが一致しません"
+
+  examples:
+    RegisterSuccess:
+      summary: 登録成功例（モック）
+      value:
+        user:
+          id: "mock-user-001"
+          username: "newuser"
+          email: "newuser@example.com"
+          createdAt: "2024-01-01T00:00:00.000Z"
+        token: "mock-jwt-token-12345"
+
+    TestUserLogin:
+      summary: テストユーザーログイン成功（モック）
+      value:
+        user:
+          id: "mock-user-001"
+          username: "testuser"
+          email: "test@example.com"
+          createdAt: "2024-01-01T00:00:00.000Z"
+        token: "mock-jwt-token-test-12345"
+
+    AdminUserLogin:
+      summary: 管理者ログイン成功（モック）
+      value:
+        user:
+          id: "mock-user-002"
+          username: "admin"
+          email: "admin@tone-app.com"
+          createdAt: "2024-01-01T00:00:00.000Z"
+        token: "mock-jwt-token-admin-67890"
+
+    DemoUserLogin:
+      summary: デモユーザーログイン成功（モック）
+      value:
+        user:
+          id: "mock-user-003"
+          username: "demouser"
+          email: "demo@demo.com"
+          createdAt: "2024-01-01T00:00:00.000Z"
+        token: "mock-jwt-token-demo-11111"
+
+    ValidationError:
+      summary: バリデーションエラー例（モック）
+      value:
+        error:
+          code: "VALIDATION_ERROR"
+          message: "入力内容にエラーがあります"
+          details:
+            username: "ユーザー名は3文字以上で入力してください"
+            email: "有効なメールアドレスを入力してください"
+            password: "パスワードは6文字以上で入力してください"
+            confirmPassword: "パスワーを入力してください"
+
+    AuthenticationError:
+      summary: 認証エラー例（モック）
+      value:
+        error:
+          code: "INVALID_CREDENTIALS"
+          message: "メールアドレスまたはパスワードが正しくありません"
+          details: {}
+
+    UserAlreadyExistsError:
+      summary: ユーザー重複エラー例（モック）
+      value:
+        error:
+          code: "USER_ALREADY_EXISTS"
+          message: "このメールアドレスは既に登録されています"
+          details: {}
