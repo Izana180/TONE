@@ -2,50 +2,42 @@
 
 ## 概要
 
-TONEアプリケーションの認証APIの**モック版**です。実際のデータベース操作や認証処理を行わず、固定のレスポンスを返すため、フロントエンド開発やテストに最適です。
+TONEアプリケーションの認証APIの**モック版**です。実際のデータベース操作や認証処理を行わず、固定のレスポンスを返すものです。
 
-## 🎯 モックAPIの特徴
 
-### ✅ **開発効率の向上**
-- **バックエンド完成前にフロントエンド開発**が可能
-- **固定レスポンス**により予測可能な動作
-- **即座にテスト**が可能
+## クイックスタート
 
-### ✅ **テストの簡素化**
-- **複雑なセットアップ**が不要
-- **データベース**や**認証サーバー**が不要
-- **一貫したテスト環境**を提供
-
-### ✅ **学習・デモ用途**
-- **APIの動作**を理解しやすい
-- **プロトタイプ作成**に最適
-- **チーム内での共有**が容易
-
-## 🚀 クイックスタート
-
-### 1. Swagger UIで確認
+### 1. Docker Composeで起動（推奨）
 ```bash
-# Swagger UIを起動（Docker使用）
-docker run --rm -p 8080:8080 -v $(pwd)/swagger-mock.yaml:/usr/share/nginx/html/swagger.yaml swaggerapi/swagger-ui
+# 全サービスを起動
+docker compose up
 
+# モックAPIのみ起動
+docker compose --profile mock up mock-api
+
+# フロントエンドのみ起動
+docker compose up frontend
+```
+
+### 2. Swagger UIで確認
+```bash
 # ブラウザでアクセス
-open http://localhost:8080
+open http://localhost:3000
 ```
 
-### 2. オンラインエディタで確認
+### 3. オンラインエディタで確認
 - [Swagger Editor](https://editor.swagger.io/) にアクセス
-- `swagger-mock.yaml` の内容をコピー&ペースト
+- `swagger.yaml` の内容をコピー&ペースト
 
-## 📋 テスト用アカウント
+## テスト用アカウント
 
-### メインアカウント
-```json
-{
-  "email": "test@example.com",
-  "password": "password123",
-  "username": "testuser"
-}
-```
+### 利用可能なテストアカウント
+
+| ユーザー名 | メールアドレス | パスワード | アカウント種別 |
+|-----------|---------------|-----------|---------------|
+| testuser | test@example.com | password123 | テストユーザー |
+| admin | admin@tone-app.com | admin123 | 管理者 |
+| demouser | demo@demo.com | demo123 | デモユーザー |
 
 ### レスポンス例
 ```json
@@ -54,45 +46,54 @@ open http://localhost:8080
     "id": "mock-user-001",
     "username": "testuser",
     "email": "test@example.com",
-    "createdAt": "2024-01-01T00:00:00.000Z"
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "profile": {
+      "firstName": "テスト",
+      "lastName": "ユーザー",
+      "avatar": "https://example.com/avatar.jpg"
+    }
   },
   "token": "mock-jwt-token-12345"
 }
 ```
 
-## 🔧 APIエンドポイント
+## APIエンドポイント
 
 ### 認証関連
 
 | メソッド | エンドポイント | 説明 | 認証 |
 |---------|---------------|------|------|
-| POST | `/auth/register` | ユーザー登録（モック） | 不要 |
-| POST | `/auth/login` | ユーザーログイン（モック） | 不要 |
-| POST | `/auth/logout` | ユーザーログアウト（モック） | 任意 |
-| GET | `/auth/me` | 現在のユーザー情報取得（モック） | 任意 |
-| GET | `/auth/health` | APIヘルスチェック（モック） | 不要 |
+| POST | `/api/v1/auth/register` | ユーザー登録（モック） | 不要 |
+| POST | `/api/v1/auth/login` | ユーザーログイン（モック） | 不要 |
+| POST | `/api/v1/auth/logout` | ユーザーログアウト（モック） | 任意 |
+| GET | `/api/v1/auth/me` | 現在のユーザー情報取得（モック） | 任意 |
+| GET | `/api/v1/auth/health` | APIヘルスチェック（モック） | 不要 |
 
-## 🎲 モック動作の詳細
+### Swagger UI
+- **URL**: `http://localhost:3000/`
+- **Swagger YAML**: `http://localhost:3000/swagger.yaml`
 
-### ユーザー登録 (`POST /auth/register`)
+## モック動作の詳細
+
+### ユーザー登録 (`POST /api/v1/auth/register`)
 ```yaml
 モック動作:
   - 実際のデータベースには保存されません
-  - 常に成功レスポンスを返します
-  - バリデーションは最小限です
-  - 固定のユーザーID: "mock-user-001"
+  - バリデーションエラー: メール形式、パスワード長、ユーザー名長をチェック
+  - 既存ユーザーエラー: existing@example.com で409エラー
+  - 成功時: 固定のユーザーID: "mock-user-001"
 ```
 
-### ユーザーログイン (`POST /auth/login`)
+### ユーザーログイン (`POST /api/v1/auth/login`)
 ```yaml
 モック動作:
-  - テストアカウント (test@example.com): 100%成功
-  - その他のアカウント: 50%成功（ランダム）
-  - 空の認証情報: 100%失敗
+  - テストアカウントのみ成功: test@example.com, admin@tone-app.com, demo@demo.com
+  - その他のアカウント: 100%失敗
+  - 詳細なエラー情報: 試行したメールアドレス、エラータイプ、提案、テストアカウント一覧
   - 固定のJWTトークン: "mock-jwt-token-12345"
 ```
 
-### ユーザー情報取得 (`GET /auth/me`)
+### ユーザー情報取得 (`GET /api/v1/auth/me`)
 ```yaml
 モック動作:
   - 固定のテストユーザー情報を返します
@@ -100,7 +101,7 @@ open http://localhost:8080
   - 常に同じユーザー情報を返します
 ```
 
-### ログアウト (`POST /auth/logout`)
+### ログアウト (`POST /api/v1/auth/logout`)
 ```yaml
 モック動作:
   - 実際のトークン無効化は行いません
@@ -108,12 +109,12 @@ open http://localhost:8080
   - 認証ヘッダーは任意です
 ```
 
-## 🧪 テスト方法
+## テスト方法
 
 ### 1. Swagger UIでのテスト
 
 #### ユーザー登録テスト
-1. `/auth/register` エンドポイントを開く
+1. `/api/v1/auth/register` エンドポイントを開く
 2. 「Try it out」ボタンをクリック
 3. 以下のJSONを入力：
 ```json
@@ -128,7 +129,7 @@ open http://localhost:8080
 5. 成功レスポンスを確認
 
 #### ログインテスト
-1. `/auth/login` エンドポイントを開く
+1. `/api/v1/auth/login` エンドポイントを開く
 2. 「Try it out」ボタンをクリック
 3. 以下のJSONを入力：
 ```json
@@ -140,43 +141,9 @@ open http://localhost:8080
 4. 「Execute」ボタンをクリック
 5. 成功レスポンスとJWTトークンを確認
 
-### 2. cURLでのテスト
 
-#### ヘルスチェック
-```bash
-curl -X GET "http://localhost:3000/api/v1/auth/health" \
-  -H "Content-Type: application/json"
-```
 
-#### ユーザー登録
-```bash
-curl -X POST "http://localhost:3000/api/v1/auth/register" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "password123",
-    "confirmPassword": "password123"
-  }'
-```
-
-#### ログイン
-```bash
-curl -X POST "http://localhost:3000/api/v1/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
-
-#### ユーザー情報取得
-```bash
-curl -X GET "http://localhost:3000/api/v1/auth/me" \
-  -H "Authorization: Bearer mock-jwt-token-12345"
-```
-
-### 3. JavaScriptでのテスト
+### 2. JavaScriptでのテスト
 
 #### Fetch API使用例
 ```javascript
@@ -206,16 +173,33 @@ const userData = await userResponse.json();
 console.log('User data:', userData);
 ```
 
-## 🔄 フロントエンドとの連携
+## フロントエンドとの連携
 
-### 現在のフロントエンドコードの更新
+### 現在のフロントエンド機能
 
-`frontend/web/src/hooks/useAuth.ts` のモックAPI関数を以下のように更新：
+#### エラーハンドリング
+- **詳細なエラーページ**: 認証失敗時に専用のエラーページを表示
+- **テストアカウント情報**: エラーページで利用可能なテストアカウントを表示
+- **リトライ機能**: エラーページからログインフォームに戻る機能
+
+#### 認証フロー
+```typescript
+// ログイン成功時
+if (success) {
+  onLoginSuccess();
+} else {
+  // エラーページを表示
+  setShowErrorPage(true);
+}
+```
+
+### フロントエンドコードの更新
+
+`frontend/web/src/hooks/useAuth.ts` のモックAPI関数：
 
 ```typescript
 // モックAPI関数（実際のAPI呼び出しに置き換え）
 const mockLoginAPI = async (data: LoginFormData): Promise<AuthResponse> => {
-  // モックAPIのエンドポイントを呼び出し
   const response = await fetch('http://localhost:3000/api/v1/auth/login', {
     method: 'POST',
     headers: {
@@ -225,14 +209,17 @@ const mockLoginAPI = async (data: LoginFormData): Promise<AuthResponse> => {
   });
 
   if (!response.ok) {
-    throw new Error('Login failed');
+    const errorData = await response.json();
+    const error = new Error(errorData.error?.message || 'ログインに失敗しました');
+    (error as any).response = { data: errorData };
+    throw error;
   }
 
   return response.json();
 };
 ```
 
-## 📊 レスポンス例
+## レスポンス例
 
 ### 成功レスポンス
 ```json
@@ -252,13 +239,34 @@ const mockLoginAPI = async (data: LoginFormData): Promise<AuthResponse> => {
 }
 ```
 
-### エラーレスポンス
+### 認証エラーレスポンス
 ```json
 {
   "error": {
     "code": "INVALID_CREDENTIALS",
     "message": "メールアドレスまたはパスワードが正しくありません",
-    "details": {}
+    "details": {
+      "attemptedEmail": "wrong@example.com",
+      "errorType": "authentication_failed",
+      "suggestion": "正しいメールアドレスとパスワードを入力してください",
+      "testAccounts": [
+        {
+          "email": "test@example.com",
+          "password": "password123",
+          "username": "testuser"
+        },
+        {
+          "email": "admin@tone-app.com",
+          "password": "admin123",
+          "username": "admin"
+        },
+        {
+          "email": "demo@demo.com",
+          "password": "demo123",
+          "username": "demouser"
+        }
+      ]
+    }
   }
 }
 ```
@@ -278,71 +286,46 @@ const mockLoginAPI = async (data: LoginFormData): Promise<AuthResponse> => {
 }
 ```
 
-## ⚠️ 注意事項
+### 既存ユーザーエラー
+```json
+{
+  "error": {
+    "code": "USER_ALREADY_EXISTS",
+    "message": "このメールアドレスは既に登録されています",
+    "details": {
+      "email": "existing@example.com"
+    }
+  }
+}
+```
 
-### セキュリティ
-- **本番環境では絶対に使用しないでください**
-- **セキュリティ機能は無効化**されています
-- **データは永続化されません**
+## 🐳 Docker環境
+
+### 起動コマンド
+```bash
+# 全サービス起動
+docker compose up
+
+# モックAPIのみ起動
+docker compose --profile mock up mock-api
+
+# バックグラウンド起動
+docker compose up -d
+
+# ログ確認
+docker compose logs -f mock-api
+
+# サービス再起動
+docker compose restart mock-api
+```
+
+### ポート設定
+- **フロントエンド**: `http://localhost:5173`
+- **モックAPI**: `http://localhost:3000`
+- **Swagger UI**: `http://localhost:3000/`
 
 ### 制限事項
 - **実際の認証処理**は行われません
 - **データベース操作**は行われません
 - **セッション管理**は実装されていません
-
-### 推奨用途
-- **フロントエンド開発**
-- **APIテスト**
-- **プロトタイプ作成**
-- **学習・デモ**
-
-## 🚀 次のステップ
-
-### 1. 実際のAPI実装
-モックAPIでフロントエンド開発が完了したら、実際のAPIサーバーを実装：
-
-```bash
-# バックエンドプロジェクトの作成
-mkdir backend
-cd backend
-npm init -y
-npm install express jsonwebtoken bcrypt cors
-```
-
-### 2. データベース設計
-```sql
--- ユーザーテーブ
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(50) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### 3. 環境変数の設定
-```bash
-# .env
-DATABASE_URL=postgresql://username:password@localhost:5432/tone_db
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=24h
-PORT=3000
-```
-
-## 📚 参考資料
-
-- [OpenAPI Specification](https://swagger.io/specification/)
-- [Swagger UI](https://swagger.io/tools/swagger-ui/)
-- [Express.js](https://expressjs.com/)
-- [JWT](https://jwt.io/)
-
-## 🤝 サポート
-
-- **メール**: support@tone-app.com
-- **GitHub Issues**: [プロジェクトのIssuesページ]
-- **ドキュメント**: [APIドキュメント]
-
----
-
-**注意**: このモックAPIは開発・テスト用途のみです。本番環境では使用しないでください。 
+- **テストアカウント以外**はログインできません
