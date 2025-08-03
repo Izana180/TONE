@@ -29,7 +29,7 @@ class UserResponse(BaseModel):
     createdAt: datetime
     
 # ユーザー新規作成レスポンス
-class createdUserResponse(BaseModel):
+class CreatedUserResponse(BaseModel):
     user: UserResponse
     token: str
     
