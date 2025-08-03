@@ -3,7 +3,7 @@ from pydantic import BaseModel, field_validator
 from typing import Optional
 
 # ユーザー新規作成リクエスト
-class User_create(BaseModel):
+class UserCreate(BaseModel):
     name: str
     email: str
     password: str
@@ -21,7 +21,7 @@ class User_create(BaseModel):
         return v
     
 # ユーザー情報
-class User_response(BaseModel):
+class UserResponse(BaseModel):
     id: int
     username: str
     email: str
@@ -29,8 +29,8 @@ class User_response(BaseModel):
     createdAt: datetime
     
 # ユーザー新規作成レスポンス
-class User_create_Response(BaseModel):
-    user: User_response
+class createdUserResponse(BaseModel):
+    user: UserResponse
     token: str
     
 # トークン
