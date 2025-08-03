@@ -8,13 +8,12 @@ load_dotenv()
 
 # DB接続文字列
 DB_URL = os.getenv("DATABASE_URL")
-
 #　基底クラス
 class Base(DeclarativeBase):
     pass
 
 # DBエンジン定義
-engine = create_engine(DB_URL)
+engine = create_engine(str(DB_URL))
 
 # テーブル作成（初回のみ）
 def create_tables():

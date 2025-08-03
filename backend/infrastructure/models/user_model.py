@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import date, datetime
-from db import Base
+from infrastructure.db import Base
 
 # DB定義 usersテーブル
 class User(Base):
