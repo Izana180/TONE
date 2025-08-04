@@ -21,7 +21,7 @@ class Token(BaseModel):
     token: str
 
 # JWTトークン生成
-def create_token(data: dict, expires_delta: Union[timedelta, None] = None):
+def create_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc).astimezone(JST) + expires_delta
