@@ -22,18 +22,19 @@ class UserCreate(BaseModel):
     
 # ユーザー情報
 class UserResponse(BaseModel):
-    id: int
+    id: str
     username: str
     email: str
     birthDate: Optional[date] = None
     createdAt: datetime
-    
-# ユーザー新規作成レスポンス
-class CreatedUserResponse(BaseModel):
-    user: UserResponse
-    token: str
-    
+
 # トークン
 class Token(BaseModel):
     token: str
-    token_typp: str = "bearer"
+    token_type: str = "bearer"
+
+# ユーザー新規作成レスポンス
+class CreatedUserResponse(BaseModel):
+    user: UserResponse
+    token: Token
+    
