@@ -15,12 +15,17 @@ class Base(DeclarativeBase):
 # DBエンジン定義
 engine = create_engine(str(DB_URL))
 
-# テーブル作成（初回のみ）
+Session = sessionmaker(autoflush=False, bind=engine)
+
+# テーブル作成（ローカル開発用）
 def create_tables():
     Base.metadata.create_all(engine)
-# DBセッション作成・取得
-def session():
+    
+def get_db():
+    # ローカル開発用
     create_tables()
-    SessionClass = sessionmaker(engine)
-    session = SessionClass()
-    return session
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
