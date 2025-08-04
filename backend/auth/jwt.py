@@ -17,9 +17,6 @@ ALGORITHM = os.getenv("JWT_ALGORITHM")
 # 日本標準時タイムゾーン(+9h)
 JST = timezone(timedelta(hours=9))
 
-class Token(BaseModel):
-    token: str
-
 # JWTトークン生成
 def create_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
     to_encode = data.copy()
