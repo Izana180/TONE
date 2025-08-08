@@ -1,12 +1,8 @@
-export type ChatRoom = {
-    id:string;
-    name:string;
-    //バックエンドのデータベースに合わせて変える
-}
+import {ChatRoom} from "../types/ChatRoom"
 
-type ChatRoomListProps= {
-    rooms:ChatRoom[];
-    onSelectRoom:(room:ChatRoom) => void;    
+interface ChatRoomListProps {
+    rooms: ChatRoom[];
+    onSelectRoom: (room: ChatRoom) => void;
 }
 
 

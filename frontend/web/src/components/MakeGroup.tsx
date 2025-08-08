@@ -1,5 +1,5 @@
 function MakeGroup() {
-    return <h1>Create a New Group</h1>;
+    return <h2>Create a New Group</h2>;
 }
 
 export default MakeGroup;
