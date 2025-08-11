@@ -10,7 +10,7 @@ load_dotenv()
 # 下記コマンドで作成:
 # $ openssl rand -hex 32
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-#署名作成時のアルゴリズム
+# 署名作成時のアルゴリズム
 ALGORITHM = os.getenv("JWT_ALGORITHM")
 # 日本標準時タイムゾーン(+9h)
 JST = timezone(timedelta(hours=9))
