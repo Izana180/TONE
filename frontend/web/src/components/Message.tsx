@@ -1,10 +1,4 @@
-import React, { useState } from 'react';
 
-interface Message {
-  id: number;
-  sender: string;
-  content: string;
-}
 function Message(){
     return (
         <div className="chat-room">
