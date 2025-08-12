@@ -5,6 +5,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    environment:
+      ENV_FILE: ${ENV_FILE:-.env.dev}
     depends_on:
       - db
 
@@ -12,9 +14,7 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_USER: tone
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: tone_db
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "5432:5432"
     volumes:
