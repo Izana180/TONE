@@ -1,8 +1,9 @@
+import mikeImg from '../assets/mike.png';
 
 function Footer() {
   return (
     <footer className="main-footer">
-        <img src="src/assets/mike.png" id="mike"/>
+        <img src={mikeImg} id="mike"/>
     </footer>
   );
 }

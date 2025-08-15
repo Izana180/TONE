@@ -1,3 +1,4 @@
+import playImg from '../assets/play.png';
 
 function Message(){
     return (
@@ -5,7 +6,7 @@ function Message(){
             <h2>Chat Room</h2>
             <div className="messages">
                 message<br/>
-                <img src="src/assets/play.png" id="play"/>
+                <img src={playImg} id="play" alt="play"/>
             </div>
         </div>
     )

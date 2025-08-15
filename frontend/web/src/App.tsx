@@ -31,21 +31,12 @@ function App() {
 
   return (
     <div className="App">
-      <MainHeader />
       <BrowserRouter>
+      <MainHeader/>
         <Routes>
           <Route path="/" element={
             <ChatPage 
               rooms={rooms} 
-              selectedRoom={selectedRoom}
-              onSelectRoom={handleSelectRoom}
-              selectedTopic={selectedTopic}
-              onTopicChange={handleTopicChange}
-            />
-          } />
-          <Route path="/messages" element={
-            <ChatPage 
-              rooms={rooms}
               selectedRoom={selectedRoom}
               onSelectRoom={handleSelectRoom}
               selectedTopic={selectedTopic}

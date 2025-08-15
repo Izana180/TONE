@@ -1,7 +1,7 @@
 import SelectTopic from "./SelectTopic";
 import { Topic } from "../types/Topic";
 import { ChatRoom } from "../types/ChatRoom";
-
+import allPlayIcon from "../assets/allPlay.png";
 type ChatHeaderProps = {
   selectedRoom: ChatRoom | null;
   selectedTopic: Topic | null;
@@ -32,7 +32,7 @@ function ChatHeader({ selectedRoom, selectedTopic, onTopicChange }: ChatHeaderPr
           onClick={handlePlayAll}
           title="全て再生"
         >
-          <img src="src/assets/allPlay.png" className="icon" alt="allPlay"/>
+          <img src={allPlayIcon} className="icon" alt="allPlay"/>
         </button>
     </div>
     </div>
