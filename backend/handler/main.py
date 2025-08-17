@@ -1,11 +1,18 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, status, Request, Depends
-from  infrastructure.db import get_db
+from database import get_db
 from sqlalchemy.orm import Session
 from fastapi.exceptions import RequestValidationError
 from usecase.user.create import create_new_user
 from models import UserCreate
 from fastapi.responses import JSONResponse
+from database import get_db, engine
+from infrastructure.base import Base
+
+# FastAPI起動時、Baseクラスを継承しているテーブルを作成する(開発用)
+# 既に作成されているテーブルは作成されない
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
 
 app = FastAPI(title="TONE API")
 
