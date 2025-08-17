@@ -21,13 +21,13 @@ def create_new_user(user: UserCreate, session: Session):
             detail={
                 "code": code.USER_ALREADY_EXISTS,
                 "error": {
-                    "message": "このメールアドレスは既に登録されています"        
+                    "message": "このメールアドレスは既に登録されています"   
                 }
             }
         )
     # パスワード暗号化(SHA-256でハッシュ化)
     hashed_password = pbkdf2_sha256.hash(user.password)
-    # 新規ユーザーオブジェクトを作成
+    # 新規ユーザーインスタンスを作成
     new_user = User(
         name=user.name, 
         email=user.email,
@@ -37,19 +37,16 @@ def create_new_user(user: UserCreate, session: Session):
     # ユーザーをINSERT
     session.add(new_user)
     session.commit()
-    # 登録されたユーザを取得
-    created_user = session.query(User).\
-        filter(User.email == user.email).all()
     # JWTトークン生成
-    new_token = create_token({"sub": str(created_user[0].id)})
+    new_token = create_token({"sub": str(new_user.id)})
     # 登録されたユーザー情報、JWTトークンをレスポンスにセット
     new_user_info = CreatedUserResponse(
         user = UserResponse(
-            id=str(created_user[0].id),
-            username=created_user[0].name,
-            email=created_user[0].email,
-            birthDate=created_user[0].birth_date,
-            createdAt=created_user[0].createdAt
+            id=str(new_user.id),
+            username=new_user.name,
+            email=new_user.email,
+            birthDate=new_user.birth_date,
+            createdAt=new_user.createdAt
         ),
         token = Token(
             token=new_token,
