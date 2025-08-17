@@ -1,11 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, status, Request, Depends
+from fastapi import FastAPI, status, Request, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
 from fastapi.exceptions import RequestValidationError
 from usecase.user.create import create_new_user
 from models import UserCreate
-from fastapi.responses import JSONResponse
 from database import get_db, engine
 from infrastructure.base import Base
 
@@ -41,13 +40,13 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
             msg = msg.removeprefix("Value error, ")
         err_details[field] = msg
         
-    return JSONResponse(
+    raise HTTPException(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
+        detail={
             "error": {
                 "code": "VALIDATION_ERROR",
                 "message": "入力内容にエラーがあります",
-                "details": err_details
+                "reasons": err_details
             }
         }
     )

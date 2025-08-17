@@ -1,6 +1,5 @@
-from fastapi import status
+from fastapi import status, HTTPException
 from sqlalchemy.orm import Session
-from fastapi.responses import JSONResponse
 from passlib.hash import pbkdf2_sha256
 from auth.jwt import create_token
 from infrastructure.models.user_model import User
@@ -16,9 +15,9 @@ def create_new_user(user: UserCreate, session: Session):
         all()
     # ユーザー重複検証
     if users:
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            content={
+            detail={
                 "code": "USER_ALREADY_EXISTS",
                 "error": {
                     "message": "このメールアドレスは既に登録されています"        
