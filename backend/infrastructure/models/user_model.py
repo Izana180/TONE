@@ -4,9 +4,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import date, datetime
-from infrastructure.db import Base
+from infrastructure.base import Base
 
-# DB定義 usersテーブル
+# usersテーブル
 class User(Base):
     __tablename__ = "users"
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, comment="ユーザーID")
