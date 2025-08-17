@@ -1,4 +1,5 @@
 from fastapi import status, HTTPException
+from handler import code
 from sqlalchemy.orm import Session
 from passlib.hash import pbkdf2_sha256
 from auth.jwt import create_token
@@ -18,7 +19,7 @@ def create_new_user(user: UserCreate, session: Session):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
-                "code": "USER_ALREADY_EXISTS",
+                "code": code.USER_ALREADY_EXISTS,
                 "error": {
                     "message": "このメールアドレスは既に登録されています"        
                 }

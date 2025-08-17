@@ -1,5 +1,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, status, Request, Depends, HTTPException
+from handler import code
+from contextlib import asynccontextmanager
 from database import get_db
 from sqlalchemy.orm import Session
 from fastapi.exceptions import RequestValidationError
@@ -8,12 +10,14 @@ from models import UserCreate
 from database import get_db, engine
 from infrastructure.base import Base
 
-# FastAPI起動時、Baseクラスを継承しているテーブルを作成する(開発用)
-# 既に作成されているテーブルは作成されない
-if __name__ == '__main__':
+# 開発用：FastAPI起動時、Baseクラスを継承しているテーブルを作成する
+# (既に作成されているテーブルは作成されない)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     Base.metadata.create_all(engine)
-
-app = FastAPI(title="TONE API")
+    yield
+    
+app = FastAPI(title="TONE API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,7 +48,7 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         detail={
             "error": {
-                "code": "VALIDATION_ERROR",
+                "code": code.VALIDATION_ERROR,
                 "message": "入力内容にエラーがあります",
                 "reasons": err_details
             }
