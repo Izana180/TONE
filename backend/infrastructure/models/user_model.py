@@ -14,5 +14,5 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, comment="メールアドレス")
     password: Mapped[str] = mapped_column(String(255), comment="パスワード")
     birth_date: Mapped[date] = mapped_column(Date, nullable=True, comment="生年月日")
-    createdAt: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("NOW()"), comment="作成日時")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("NOW()"), comment="作成日時")
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("NOW()"), onupdate=text("NOW()"), comment="更新日時")

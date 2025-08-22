@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(length=255), nullable=False, comment='メールアドレス'),
     sa.Column('password', sa.String(255), nullable=False, comment="パスワード"),
     sa.Column('birth_date', sa.Date(), nullable=True, comment="生年月日"),
-    sa.Column('createdAt', sa.DateTime(timezone=True), server_default=sa.text('NOW()'), nullable=False, comment='作成日時'),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('NOW()'), nullable=False, comment='作成日時'),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('NOW()'), nullable=False, comment='更新日時'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
