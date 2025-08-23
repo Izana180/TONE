@@ -25,8 +25,8 @@ class UserResponse(BaseModel):
     id: str
     username: str
     email: str
-    birthDate: Optional[date] = None
-    createdAt: datetime
+    birth_date: Optional[date] = None
+    created_at: datetime
 
 # トークン
 class Token(BaseModel):

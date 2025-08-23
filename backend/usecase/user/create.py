@@ -45,8 +45,8 @@ def create_new_user(user: UserCreate, session: Session):
             id=str(new_user.id),
             username=new_user.name,
             email=new_user.email,
-            birthDate=new_user.birth_date,
-            createdAt=new_user.created_at
+            birth_date=new_user.birth_date,
+            created_at=new_user.created_at
         ),
         token = Token(
             token=new_token,
