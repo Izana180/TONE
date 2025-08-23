@@ -25,7 +25,7 @@ def create_new_user(user: UserCreate, session: Session):
                 }
             }
         )
-    # パスワード暗号化(SHA-256でハッシュ化)
+    # パスワード暗号化
     hashed_password = pbkdf2_sha256.hash(user.password)
     # 新規ユーザーインスタンスを作成
     new_user = User(
@@ -46,7 +46,7 @@ def create_new_user(user: UserCreate, session: Session):
             username=new_user.name,
             email=new_user.email,
             birthDate=new_user.birth_date,
-            createdAt=new_user.createdAt
+            createdAt=new_user.created_at
         ),
         token = Token(
             token=new_token,
