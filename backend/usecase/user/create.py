@@ -43,7 +43,7 @@ def create_new_user(user: UserCreate, session: Session):
     new_user_info = CreatedUserResponse(
         user = UserResponse(
             id=str(new_user.id),
-            username=new_user.name,
+            name=new_user.name,
             email=new_user.email,
             birth_date=new_user.birth_date,
             created_at=new_user.created_at

@@ -9,13 +9,19 @@ class UserCreate(BaseModel):
     email: str
     password: str
     birth_date: Optional[date] = None
-    # バリデーター
+    
     @field_validator("name")
-    def validate_name(cls, v):
-        if(len(v) < 3):
+    def validate_name(cls, value):
+        if(len(value) < 3):
             raise ValueError("ユーザー名は3文字以上で入力してください")
-        
-        return v
+        return value
+    
+    @field_validator("email")
+    def validate_email(cls, value):
+        if not re.match(r'^[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$', value):
+            raise ValueError("メールアドレスの形式が正しくありません")
+        return value
+    
     @field_validator("password")
     def validate_password(cls, value):
         if(len(value) < 10):
@@ -33,7 +39,7 @@ class UserCreate(BaseModel):
 # ユーザー情報
 class UserResponse(BaseModel):
     id: str
-    username: str
+    name: str
     email: str
     birth_date: Optional[date] = None
     created_at: datetime
