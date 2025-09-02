@@ -53,4 +53,8 @@ class Token(BaseModel):
 class CreatedUserResponse(BaseModel):
     user: UserResponse
     token: Token
-    
+
+#ログインの際のリクエスト
+class LoginRequest(BaseModel):
+    email: str
+    password: str

@@ -9,6 +9,9 @@ from usecase.user.create import create_new_user
 from models import UserCreate
 from database import get_db, engine
 from infrastructure.base import Base
+from models import user_model, LoginRequest
+from auth import jwt
+from passlib.hash import pbkdf2_sha256
 
 # 開発用：FastAPI起動時、Baseクラスを継承しているテーブルを作成する
 # (既に作成されているテーブルは作成されない)
@@ -59,3 +62,29 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
 @app.post("/users", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, session: Session = Depends(get_db)):
     return create_new_user(user=user, session=session)
+
+##ユーザーログイン機能
+
+##パスワード確認機能
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pbkdf2_sha256.verify(plain_password, hashed_password)
+
+@app.post(path='/user/login', status_code=status.HTTP_200_OK)
+def authenticate_user(body: LoginRequest, db: Session = Depends(get_db)):
+    db_user = db.query(user_model.User).filter(user_model.User.email == body.email).first()
+
+    if not db_user or not(verify_password(body.password, db_user.password)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            'status': False,
+            'access_token': None,
+            'message': 'メールアドレスまたはパスワードが一致しません',
+            'data': None
+            }
+        )
+    access_token = jwt.create_token({"sub": str(db_user.id)})
+    return {
+        'status': True,
+        'access_token': access_token,
+    }
