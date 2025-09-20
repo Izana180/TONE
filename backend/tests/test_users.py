@@ -1,11 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
-from datetime import date
-from unittest.mock import Mock, patch
-from sqlalchemy.orm import Session
+from unittest.mock import patch
 from handler.main import app
-from models import UserCreate
-from infrastructure.models.user_model import User as UserModel
 
 client = TestClient(app)
 
