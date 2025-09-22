@@ -6,3 +6,4 @@ python-dotenv
 passlib
 PyJWT
 alembic
+ruff
