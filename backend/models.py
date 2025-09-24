@@ -56,5 +56,5 @@ class CreatedUserResponse(BaseModel):
 
 #ログインの際のリクエスト
 class LoginRequest(BaseModel):
-    name: str = Field(max_length=3)
-    password: str = Field(max_length=10)
+    email: str
+    password: str = Field(min_length=10)

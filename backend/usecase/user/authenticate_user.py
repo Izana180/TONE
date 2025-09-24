@@ -5,7 +5,7 @@ from ....database import get_db
 from fastapi import status, Depends, HTTPException
 from ....auth import jwt
 
-@app.post(path='/user/login', status_code=status.HTTP_200_OK)
+@app.post(path='/auth/login', status_code=status.HTTP_200_OK)
 def authenticate_user(body: LoginRequest, db: Session = Depends(get_db)):
     db_user = db.query(user_model.User).filter(user_model.User.email == body.email).first()
 
@@ -26,7 +26,7 @@ def authenticate_user(body: LoginRequest, db: Session = Depends(get_db)):
           "id": db_user.id,
           "username": db_user.name,
           "email": db_user.email,
-          "birthDate": db_user.password,
+          "birthDate": db_user.birth_date,
           "createdAt": db_user.created_at
         },
           "token": access_token
