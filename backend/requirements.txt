@@ -6,3 +6,6 @@ python-dotenv
 passlib
 PyJWT
 alembic
+pytest
+pytest-asyncio
+httpx
