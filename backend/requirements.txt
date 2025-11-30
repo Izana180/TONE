@@ -7,3 +7,6 @@ passlib
 PyJWT
 alembic
 ruff
+pytest
+pytest-asyncio
+httpx
