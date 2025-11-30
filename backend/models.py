@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 from typing import Optional
 import re
 
@@ -53,4 +53,8 @@ class Token(BaseModel):
 class CreatedUserResponse(BaseModel):
     user: UserResponse
     token: Token
-    
+
+#ログインの際のリクエスト
+class LoginRequest(BaseModel):
+    email: str
+    password: str = Field(min_length=10)

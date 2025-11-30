@@ -6,9 +6,11 @@ from database import get_db
 from sqlalchemy.orm import Session
 from fastapi.exceptions import RequestValidationError
 from usecase.user.create import create_new_user
-from models import UserCreate
+from models import UserCreate, LoginRequest
 from database import get_db, engine
 from infrastructure.base import Base
+from auth import jwt
+from passlib.hash import pbkdf2_sha256
 
 # 開発用：FastAPI起動時、Baseクラスを継承しているテーブルを作成する
 # (既に作成されているテーブルは作成されない)
@@ -59,3 +61,10 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
 @app.post("/users", status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, session: Session = Depends(get_db)):
     return create_new_user(user=user, session=session)
+
+##ユーザーログイン機能
+
+##パスワード確認機能
+@app.get(path='/auth/login', status_code=status.HTTP_200_OK)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pbkdf2_sha256.verify(plain_password, hashed_password)    
